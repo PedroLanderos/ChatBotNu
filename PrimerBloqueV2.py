@@ -1,0 +1,179 @@
+# PrimerBloqueV2.py
+# -*- coding: utf-8 -*-
+import re
+import unicodedata
+
+def normaliza(txt: str) -> str:
+    txt = (txt or "").strip()
+    txt = unicodedata.normalize("NFD", txt)
+    txt = "".join(ch for ch in txt if unicodedata.category(ch) != "Mn")
+    return txt.lower()
+
+# ---- patrones ----
+salir_RE = re.compile(r"^(no|salir|me equivoque|perd[oó]n|adi[oó]s|deseo (salir|interrumpir))$", re.IGNORECASE)
+
+q1_RE  = re.compile(r"\btipo de tarjeta\b|d[eé]bito|credito", re.IGNORECASE)
+q2_RE  = re.compile(r"requisitos?|requerimientos?|que necesito|documentos|pasos.*aplicar|abrir.*cuenta|crear.*cuenta", re.IGNORECASE)
+q3_RE  = re.compile(r"(como|c[oó]mo).*(solicitar|aplicar|pedir).*(tarjeta|credito)|\b(solicitar|aplicar|pedir)\b.*\b(tarjeta|credito)\b", re.IGNORECASE)
+q4_RE  = re.compile(r"(aprobar|aprobacion)|en que se basan|criterios?.*solicitud|historial.*crediticio", re.IGNORECASE)
+q5_RE  = re.compile(r"\bmsi\b|meses sin intereses", re.IGNORECASE)
+q6_RE  = re.compile(r"reclamaci[oó]n.*(vulnerab|situaci[oó]n de vulnerabilidad|grupo vulnerable)", re.IGNORECASE)
+q7_RE  = re.compile(r"registrar.*(tarjeta).*(fisica|virtual)|registrar.*(virtual|fisica)", re.IGNORECASE)
+q8_RE  = re.compile(r"(apple ?pay).*(gratis|comision|comisi[oó]n|costo|cargo|cobra)", re.IGNORECASE)
+q9_RE  = re.compile(r"(comprar|usar|pagar).*(fuera de mexico|extranjero|internacional|viaje)", re.IGNORECASE)
+q10_RE = re.compile(r"predeterminada|default|mover.*frente.*(pagar|transaccion)", re.IGNORECASE)
+q11_RE = re.compile(r"aumento.*(pequeno|peque[nñ]o|bajo)", re.IGNORECASE)
+q12_RE = re.compile(r"(como|c[oó]mo).*(aumentar|incrementar).*(linea|credito)|incrementar.*linea", re.IGNORECASE)
+q13_RE = re.compile(r"linea.*(baja|muy baja)|por que.*(linea|credito).*(baja|pequena|peque[nñ]a)", re.IGNORECASE)
+q14_RE = re.compile(r"(en cuanto|cuanto|cu[aá]nto).*tiempo.*(recibir|llega)|entrega.*tarjeta|domicilio|recibir.*tarjeta", re.IGNORECASE)
+q15_RE = re.compile(r"(como|c[oó]mo).*invitar|invitar.*(alguien|amigos?)", re.IGNORECASE)
+q16_RE = re.compile(r"invito.*no paga|si invito.*no paga|\bno pago\b", re.IGNORECASE)
+q17_RE = re.compile(r"(donde|d[oó]nde).*(invita|invitacion)|conseguir.*invitacion", re.IGNORECASE)
+q18_RE = re.compile(r"(que|qu[eé]).*(da|ofrece).*(si invito)|recompensa.*invitar", re.IGNORECASE)
+q19_RE = re.compile(r"(donde|d[oó]nde).*compartir.*invitacion|compartir.*invitacion", re.IGNORECASE)
+q20_RE = re.compile(r"beneficios?.*invitacion|ventajas?.*con invitacion", re.IGNORECASE)
+q21_RE = re.compile(r"tarjeta.*virtual.*ademas.*fisica|por que.*tarjeta.*virtual", re.IGNORECASE)
+q22_RE = re.compile(r"comisiones|cobros ocultos|anualidad|comision.*tardi[oó]|comisi[oó]n.*tardio", re.IGNORECASE)
+q23_RE = re.compile(r"(como|c[oó]mo).*(pagar).*(tarjeta)|opciones.*pago|boton.*pagar", re.IGNORECASE)
+q24_RE = re.compile(r"(que|qu[eé]).*linea.*obtener|cual.*linea.*credito", re.IGNORECASE)
+q25_RE = re.compile(r"lista de espera|estoy en espera|cu[aá]nto tarda el analisis|cuanto tarda el analisis", re.IGNORECASE)
+
+def run_chatbot_nu():
+    # ---- máquina de estados ----
+    state = 0
+    Salida = 1
+
+    print("¡Hola! Soy el Chatbot de NU México ¿En qué puedo ayudarte hoy?")
+
+    while Salida:
+        if state == 0:
+            opcion = normaliza(input("Cuéntame tu duda (MSI, Apple Pay, solicitar tarjeta, línea de crédito, etc.): "))
+
+            if q1_RE.search(opcion):    state = 1
+            elif q2_RE.search(opcion):  state = 2
+            elif q3_RE.search(opcion):  state = 3
+            elif q4_RE.search(opcion):  state = 4
+            elif q5_RE.search(opcion):  state = 5
+            elif q6_RE.search(opcion):  state = 6
+            elif q7_RE.search(opcion):  state = 7
+            elif q8_RE.search(opcion):  state = 8
+            elif q9_RE.search(opcion):  state = 9
+            elif q10_RE.search(opcion): state = 10
+            elif q11_RE.search(opcion): state = 11
+            elif q12_RE.search(opcion): state = 12
+            elif q13_RE.search(opcion): state = 13
+            elif q14_RE.search(opcion): state = 14
+            elif q15_RE.search(opcion): state = 15
+            elif q16_RE.search(opcion): state = 16
+            elif q17_RE.search(opcion): state = 17
+            elif q18_RE.search(opcion): state = 18
+            elif q19_RE.search(opcion): state = 19
+            elif q20_RE.search(opcion): state = 20
+            elif q21_RE.search(opcion): state = 21
+            elif q22_RE.search(opcion): state = 22
+            elif q23_RE.search(opcion): state = 23
+            elif q24_RE.search(opcion): state = 24
+            elif q25_RE.search(opcion): state = 25
+            elif salir_RE.search(opcion): state = 27
+            else: state = 28
+            continue
+
+        # ---- respuestas ----
+        if state == 1:
+            print("Nu te ofrece tarjeta de crédito Mastercard Gold, y si abres tu Cuenta Nu, te mandamos tu tarjeta de débito para compras físicas."); state = 26; continue
+        if state == 2:
+            print("Todo lo podrás hacer de manera digital, sin filas ni papeleo."); state = 26; continue
+        if state == 3:
+            print("En nuestro sitio web y en menos de 3 minutos."); state = 26; continue
+        if state == 4:
+            print("En tu historial crediticio y otros factores."); state = 26; continue
+        if state == 5:
+            print("Claro, conoce todos nuestros aliados de MSI en www.nu.com.mx/meses-sin-intereses-con-nu/"); state = 26; continue
+        if state == 6:
+            print("Para realizar una reclamación en Nu como persona perteneciente a grupos en situación de vulnerabilidad, puedes comunicarte al teléfono o a través del chat dentro de la app."); state = 26; continue
+        if state == 7:
+            print("Puedes registrar la que tú prefieras. Tanto tu tarjeta Nu virtual o física. Recuerda, si agregas la tarjeta virtual y en el futuro tienes que eliminarla, tendrás que volver a agregarla."); state = 26; continue
+        if state == 8:
+            print("Apple Pay no cobra comisiones, así que podrás hacer las compras que quieras sin ningún cargo adicional o comisión al pagar, más allá del monto de tu compra."); state = 26; continue
+        if state == 9:
+            print("Nu y Apple Pay puedes hacer compras internacionales en las terminales que acepten Mastercard y pagos contactless."); state = 26; continue
+        if state == 10:
+            print("La primera tarjeta agregada a Wallet se convierte en la tarjeta de pago predeterminada. Para establecer otra tarjeta como predeterminada, muévela al frente antes de realizar una transacción."); state = 26; continue
+        if state == 11:
+            print("En Nu buscamos dar aumentos constantes y paulatinos, por lo que por ahora puede parecer que obtienes aumentos relativamente bajos."); state = 26; continue
+        if state == 12:
+            print("La clave es: usa tu tarjeta de crédito y paga por lo menos el pago mínimo a tiempo."); state = 26; continue
+        if state == 13:
+            print("Nosotros buscamos que tengas buen control sobre tus finanzas y deseamos que tu capacidad de pago no sobrepase tu crédito. Por eso, para definir tu línea de crédito, evaluamos varios aspectos."); state = 26; continue
+        if state == 14:
+            print("Hasta 7 días hábiles a partir de la creación de tu perfil o solicitud de reposición de tu tarjeta."); state = 26; continue
+        if state == 15:
+            print("Desde la app, selecciona el botón de 'invitar amigos'."); state = 26; continue
+        if state == 16:
+            print("No te preocupes, esto no te afectará de ninguna forma."); state = 26; continue
+        if state == 17:
+            print("Puedes pedirle una invitación a alguien que ya tenga su tarjeta Nu."); state = 26; continue
+        if state == 18:
+            print("Por el momento no tenemos una recompensa específica."); state = 26; continue
+        if state == 19:
+            print("Puedes compartirlo por el canal que prefieras."); state = 26; continue
+        if state == 20:
+            print("Tienes más posibilidades de obtener la tarjeta Nu."); state = 26; continue
+        if state == 21:
+            print("Para darte más seguridad al hacer compras o pagos en línea."); state = 26; continue
+        if state == 22:
+            print("En Nu no hay cobros ocultos. Solo hay una comisión por pago tardío: $116 o $348 IVA incluido, según tu límite."); state = 26; continue
+        if state == 23:
+            print("Consulta en la app, en el botón de 'pagar', para conocer todas las opciones para pagar."); state = 26; continue
+        if state == 24:
+            print("Depende del perfil y puede ir aumentando."); state = 26; continue
+        if state == 25:
+            print("Que el análisis puede tardar hasta 3 meses."); state = 26; continue
+
+        # ---- menú “¿algo más?” ----
+        if state == 26:
+            opcion = normaliza(input("¿Necesitas ayuda con algo más? (escribe 'salir' para terminar): "))
+            if salir_RE.search(opcion): state = 27
+            elif q1_RE.search(opcion):  state = 1
+            elif q2_RE.search(opcion):  state = 2
+            elif q3_RE.search(opcion):  state = 3
+            elif q4_RE.search(opcion):  state = 4
+            elif q5_RE.search(opcion):  state = 5
+            elif q6_RE.search(opcion):  state = 6
+            elif q7_RE.search(opcion):  state = 7
+            elif q8_RE.search(opcion):  state = 8
+            elif q9_RE.search(opcion):  state = 9
+            elif q10_RE.search(opcion): state = 10
+            elif q11_RE.search(opcion): state = 11
+            elif q12_RE.search(opcion): state = 12
+            elif q13_RE.search(opcion): state = 13
+            elif q14_RE.search(opcion): state = 14
+            elif q15_RE.search(opcion): state = 15
+            elif q16_RE.search(opcion): state = 16
+            elif q17_RE.search(opcion): state = 17
+            elif q18_RE.search(opcion): state = 18
+            elif q19_RE.search(opcion): state = 19
+            elif q20_RE.search(opcion): state = 20
+            elif q21_RE.search(opcion): state = 21
+            elif q22_RE.search(opcion): state = 22
+            elif q23_RE.search(opcion): state = 23
+            elif q24_RE.search(opcion): state = 24
+            elif q25_RE.search(opcion): state = 25
+            else: state = 28
+            continue
+
+        # ---- salir ----
+        if state == 27:
+            print("¡Gracias por contactarnos! Fue un placer ayudarte.")
+            Salida = 0
+            continue
+
+        # ---- no entendido ----
+        if state == 28:
+            print("No logré entender tu consulta. ¿Podrías intentarlo de nuevo?")
+            state = 0
+            continue
+
+# permite ejecutar este módulo directo si quieres
+if __name__ == "__main__":
+    run_chatbot_nu()

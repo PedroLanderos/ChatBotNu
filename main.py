@@ -3,7 +3,7 @@
 
 def menu():
     print("\n=== Centro de Chatbots ===")
-    print("1) Bot NU (ExportarPrimerBloque)")
+    print("1) Bot NU (PrimerBloqueV2)")
     print("q) Salir")
 
 def main():
@@ -11,8 +11,8 @@ def main():
         menu()
         op = input("> ").strip().lower()
         if op == "1":
-            # Importa y ejecuta el bot de ExportarPrimerBloque
-            from ExportarPrimerBloque import run_chatbot_nu
+            # Importa y ejecuta el bot de PrimerBloqueV2
+            from PrimerBloqueV2 import run_chatbot_nu
             run_chatbot_nu()
         elif op in ("q", "quit", "salir"):
             print("¡Hasta luego!")
